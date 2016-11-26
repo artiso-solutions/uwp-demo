@@ -19,7 +19,6 @@ namespace MyWhiteboard.Stroke
         private readonly Dictionary<Guid, InkStroke> idToStrokeMapping;
         private readonly InkStrokeBuilder strokeBuilder;
         private readonly StrokeChangeBroker strokeChangeBroker;
-        private readonly Dictionary<InkStroke, Guid> strokeToIdMapping;
 
         public StrokeSynchronization(InkCanvas canvas, InkToolbar inkToolbar, StrokeChangeBroker strokeChangeBroker)
         {
@@ -29,7 +28,6 @@ namespace MyWhiteboard.Stroke
 
             strokeBuilder = new InkStrokeBuilder();
 
-            strokeToIdMapping = new Dictionary<InkStroke, Guid>();
             idToStrokeMapping = new Dictionary<Guid, InkStroke>();
 
             strokeChangeBroker.StrokeCollected += StrokeChangeBrokerOnStrokeCollected;
@@ -93,7 +91,6 @@ namespace MyWhiteboard.Stroke
 
                         var newStroke = strokeBuilder.CreateStrokeFromInkPoints(points, Matrix3x2.Identity);
                         idToStrokeMapping[strokeDescription.Id] = newStroke;
-                        strokeToIdMapping[newStroke] = strokeDescription.Id;
 
                         canvas.InkPresenter.StrokeContainer.AddStroke(newStroke);
                     }
@@ -102,37 +99,32 @@ namespace MyWhiteboard.Stroke
 
         private async void StrokeChangeBrokerOnStrokeErased(object sender, Guid strokeId)
         {
-            if (!idToStrokeMapping.ContainsKey(strokeId))
-            {
-                return;
-            }
-
-            var stroke = idToStrokeMapping[strokeId];
-            idToStrokeMapping.Remove(strokeId);
-            strokeToIdMapping.Remove(stroke);
-
-            foreach (var strokeMapping in strokeToIdMapping.ToList())
-            {
-                var newStroke = strokeMapping.Key.Clone();
-                strokeToIdMapping.Remove(strokeMapping.Key);
-                strokeToIdMapping[newStroke] = strokeMapping.Value;
-                idToStrokeMapping[strokeMapping.Value] = newStroke;
-            }
-
             await CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal,
                 () =>
                 {
                     lock (canvasChangeLock)
                     {
+                        if (!idToStrokeMapping.ContainsKey(strokeId))
+                        {
+                            return;
+                        }
+
+                        idToStrokeMapping.Remove(strokeId);
+
+                        foreach (var strokeMapping in idToStrokeMapping.ToList())
+                        {
+                            var newStroke = strokeMapping.Value.Clone();
+                            idToStrokeMapping[strokeMapping.Key] = newStroke;
+                        }
+
                         canvas.InkPresenter.StrokeContainer.Clear();
-                        canvas.InkPresenter.StrokeContainer.AddStrokes(idToStrokeMapping.Values);
+                        canvas.InkPresenter.StrokeContainer.AddStrokes(idToStrokeMapping.Values.ToList());
                     }
                 });
         }
 
         private async void StrokeChangeBrokerOnAllStrokeErased(object sender, EventArgs eventArgs)
         {
-            strokeToIdMapping.Clear();
             idToStrokeMapping.Clear();
 
             await CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal,
@@ -147,10 +139,9 @@ namespace MyWhiteboard.Stroke
 
         private void InkToolbarOnEraseAllClicked(InkToolbar sender, object args)
         {
-            strokeChangeBroker.SendEraseAllStrokes();
-
-            strokeToIdMapping.Clear();
             idToStrokeMapping.Clear();
+
+            strokeChangeBroker.SendEraseAllStrokes();
         }
 
         private void InkPresenterOnStrokesCollected(InkPresenter sender, InkStrokesCollectedEventArgs args)
@@ -159,9 +150,7 @@ namespace MyWhiteboard.Stroke
             {
                 var strokeId = Guid.NewGuid();
 
-                strokeToIdMapping[stroke] = strokeId;
                 idToStrokeMapping[strokeId] = stroke;
-
 
                 strokeChangeBroker.SendStrokeCollected(strokeId, stroke);
             }
@@ -171,11 +160,17 @@ namespace MyWhiteboard.Stroke
         {
             foreach (var stroke in args.Strokes)
             {
-                var id = strokeToIdMapping[stroke];
-                strokeChangeBroker.SendEraseStroke(id);
+                foreach (var inkStrokeMapping in idToStrokeMapping.ToList())
+                {
+                    if (inkStrokeMapping.Value != stroke)
+                    {
+                        continue;
+                    }
 
-                strokeToIdMapping.Remove(stroke);
-                idToStrokeMapping.Remove(id);
+                    var id = inkStrokeMapping.Key;
+                    idToStrokeMapping.Remove(id);
+                    strokeChangeBroker.SendEraseStroke(id);
+                }
             }
         }
     }
