@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImageReview", "ImageReview\ImageReview.csproj", "{B90B8EBC-4E95-4DE4-B929-05FFE93F5A13}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyWhiteboard", "MyWhiteboard\MyWhiteboard.csproj", "{B90B8EBC-4E95-4DE4-B929-05FFE93F5A13}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImageReview.Service", "ImageReview.Service\ImageReview.Service.csproj", "{18CBC751-7983-4FD7-A349-40DABCA20390}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyWhiteboard.Service", "MyWhiteboard.Service\MyWhiteboard.Service.csproj", "{18CBC751-7983-4FD7-A349-40DABCA20390}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
