@@ -33,6 +33,7 @@ namespace MyWhiteboard.Stroke
             strokeChangeBroker.StrokeCollected += StrokeChangeBrokerOnStrokeCollected;
             strokeChangeBroker.StrokeErased += StrokeChangeBrokerOnStrokeErased;
             strokeChangeBroker.AllStrokeErased += StrokeChangeBrokerOnAllStrokeErased;
+            strokeChangeBroker.ResendAllStrokesRequested += StrokeChangeBrokerOnResendAllStrokesRequested;
 
             inkToolbar.EraseAllClicked += InkToolbarOnEraseAllClicked;
 
@@ -45,6 +46,7 @@ namespace MyWhiteboard.Stroke
             strokeChangeBroker.StrokeCollected -= StrokeChangeBrokerOnStrokeCollected;
             strokeChangeBroker.StrokeErased -= StrokeChangeBrokerOnStrokeErased;
             strokeChangeBroker.AllStrokeErased -= StrokeChangeBrokerOnAllStrokeErased;
+            strokeChangeBroker.ResendAllStrokesRequested -= StrokeChangeBrokerOnResendAllStrokesRequested;
 
             inkToolbar.EraseAllClicked -= InkToolbarOnEraseAllClicked;
 
@@ -135,6 +137,14 @@ namespace MyWhiteboard.Stroke
                         canvas.InkPresenter.StrokeContainer.Clear();
                     }
                 });
+        }
+
+        private void StrokeChangeBrokerOnResendAllStrokesRequested(object sender, EventArgs eventArgs)
+        {
+            foreach (var inkStroke in idToStrokeMapping)
+            {
+                strokeChangeBroker.SendStrokeCollected(inkStroke.Key, inkStroke.Value);
+            }
         }
 
         private void InkToolbarOnEraseAllClicked(InkToolbar sender, object args)

@@ -1,9 +1,9 @@
-﻿using System;
+﻿using Microsoft.AspNet.SignalR.Client;
+using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Windows.UI.Input.Inking;
-using Microsoft.AspNet.SignalR.Client;
 
 namespace MyWhiteboard.Stroke
 {
@@ -27,6 +27,7 @@ namespace MyWhiteboard.Stroke
         public event EventHandler<PresenceInfo> PresenceChanged;
         public event EventHandler<string> MachineOffline;
         public event EventHandler<string> BackgroundImageChanged;
+        public event EventHandler ResendAllStrokesRequested;
 
         public async Task StartBrokerAsync()
         {
@@ -44,10 +45,12 @@ namespace MyWhiteboard.Stroke
 
             hubProxy.On<string, bool>("onUpdateMachinePresence", (machineName, isPresent) => PresenceChanged?.Invoke(this, new PresenceInfo
             {
-                MachineName = machineName, IsPresent = isPresent
+                MachineName = machineName,
+                IsPresent = isPresent
             }));
             hubProxy.On<string>("onMachineOffline", machineName => MachineOffline?.Invoke(this, machineName));
             hubProxy.On<string>("onBackgroundImageChanged", uri => BackgroundImageChanged?.Invoke(this, uri));
+            hubProxy.On("onResendAllStrokesRequested", () => ResendAllStrokesRequested?.Invoke(this, EventArgs.Empty));
 
             await connection.Start();
 
@@ -89,6 +92,11 @@ namespace MyWhiteboard.Stroke
         public void SendMachineIsOffline(string machineName)
         {
             hubProxy?.Invoke("MachineIsOffline", machineName);
+        }
+
+        public void RequestResendAllStrokes()
+        {
+            hubProxy?.Invoke("ResendAllStrokes");
         }
     }
 }

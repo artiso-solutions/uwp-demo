@@ -34,5 +34,10 @@ namespace MyWhiteboard.Service
         {
             Clients.All.onBackgroundImageChanged(uri);
         }
+
+        public void ResendAllStrokes()
+        {
+            Clients.All.onResendAllStrokesRequested();
+        }
     }
 }

@@ -1,4 +1,6 @@
-﻿using System;
+﻿using MyWhiteboard.ImageHandling;
+using MyWhiteboard.Stroke;
+using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
@@ -10,8 +12,6 @@ using Windows.Networking.Connectivity;
 using Windows.UI.Core;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Navigation;
-using MyWhiteboard.ImageHandling;
-using MyWhiteboard.Stroke;
 
 // The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
@@ -89,8 +89,9 @@ namespace MyWhiteboard
             strokeSynchronization = new StrokeSynchronization(InkCanvas, InkToolbar, StrokeChangeBroker.Instance);
 
             await StrokeChangeBroker.Instance.StartBrokerAsync();
-
+            
             StrokeChangeBroker.Instance.UpdateMachineState(machineName, true);
+            StrokeChangeBroker.Instance.RequestResendAllStrokes();
 
             Task.Run(() =>
             {
