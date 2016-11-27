@@ -15,6 +15,7 @@ namespace MyWhiteboard.Stroke
         private bool alreadyStarted;
         private HubConnection connection;
         private IHubProxy hubProxy;
+        private string currentSessionUri;
 
         private StrokeChangeBroker()
         {
@@ -24,17 +25,16 @@ namespace MyWhiteboard.Stroke
         public event EventHandler<StrokeDescription> StrokeCollected;
         public event EventHandler<Guid> StrokeErased;
         public event EventHandler AllStrokeErased;
-        public event EventHandler<PresenceInfo> PresenceChanged;
-        public event EventHandler<string> MachineOffline;
-        public event EventHandler<string> BackgroundImageChanged;
         public event EventHandler ResendAllStrokesRequested;
 
-        public async Task StartBrokerAsync()
+        public async Task StartBrokerAsync(string sessionUri)
         {
             if (alreadyStarted)
             {
                 return;
             }
+
+            currentSessionUri = sessionUri;
 
             connection = new HubConnection(Consts.SignalRUrl);
             hubProxy = connection.CreateHubProxy("StrokeSyncHub");
@@ -42,61 +42,43 @@ namespace MyWhiteboard.Stroke
             hubProxy.On<byte[]>("onStrokeCollected", compressedStrokePoints => { strokeChunkManager.ReceiveStrokePart(compressedStrokePoints, strokeDescription => StrokeCollected?.Invoke(this, strokeDescription)); });
             hubProxy.On<Guid>("onEraseStroke", strokeId => StrokeErased?.Invoke(this, strokeId));
             hubProxy.On("onEraseAllStrokes", () => AllStrokeErased?.Invoke(this, EventArgs.Empty));
-
-            hubProxy.On<string, bool>("onUpdateMachinePresence", (machineName, isPresent) => PresenceChanged?.Invoke(this, new PresenceInfo
-            {
-                MachineName = machineName,
-                IsPresent = isPresent
-            }));
-            hubProxy.On<string>("onMachineOffline", machineName => MachineOffline?.Invoke(this, machineName));
-            hubProxy.On<string>("onBackgroundImageChanged", uri => BackgroundImageChanged?.Invoke(this, uri));
             hubProxy.On("onResendAllStrokesRequested", () => ResendAllStrokesRequested?.Invoke(this, EventArgs.Empty));
 
             await connection.Start();
 
             await Task.Delay(500);
             alreadyStarted = true;
+
+            await hubProxy.Invoke("JoinSession", currentSessionUri);
         }
 
-        public void StopBroker()
+        public async void StopBroker()
         {
+            await hubProxy.Invoke("LeaveSession", currentSessionUri);
             connection.Stop();
+
+            alreadyStarted = false;
         }
 
         public void SendStrokeCollected(Guid strokeId, InkStroke stroke)
         {
             var points = stroke.GetInkPoints().ToList();
-            strokeChunkManager.SendStrokeInChunks(strokeId, points, stroke.DrawingAttributes, data => hubProxy?.Invoke(nameof(SendStrokeCollected), data));
+            strokeChunkManager.SendStrokeInChunks(strokeId, points, stroke.DrawingAttributes, data => hubProxy?.Invoke(nameof(SendStrokeCollected), currentSessionUri, data));
         }
 
         public void SendEraseAllStrokes()
         {
-            hubProxy?.Invoke(nameof(SendEraseAllStrokes));
+            hubProxy?.Invoke(nameof(SendEraseAllStrokes), currentSessionUri);
         }
 
         public void SendEraseStroke(Guid strokeId)
         {
-            hubProxy?.Invoke(nameof(SendEraseStroke), strokeId);
-        }
-
-        public void UpdateMachineState(string machineName, bool isPresent)
-        {
-            hubProxy?.Invoke("UpdateMachinePresence", machineName, isPresent);
-        }
-
-        public void SendBackgroundImageChanged(string imageUri)
-        {
-            hubProxy?.Invoke("BackgroundImageChanged", imageUri);
-        }
-
-        public void SendMachineIsOffline(string machineName)
-        {
-            hubProxy?.Invoke("MachineIsOffline", machineName);
+            hubProxy?.Invoke(nameof(SendEraseStroke), currentSessionUri, strokeId);
         }
 
         public void RequestResendAllStrokes()
         {
-            hubProxy?.Invoke("ResendAllStrokes");
+            hubProxy?.Invoke("ResendAllStrokes", currentSessionUri);
         }
     }
 }

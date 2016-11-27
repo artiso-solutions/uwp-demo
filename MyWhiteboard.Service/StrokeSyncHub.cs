@@ -1,43 +1,39 @@
 ﻿using Microsoft.AspNet.SignalR;
 using System;
+using System.Threading.Tasks;
 
 namespace MyWhiteboard.Service
 {
     public class StrokeSyncHub : Hub
     {
-        public void SendStrokeCollected(object strokeDefinition)
+        public async Task JoinSession(string sessionUri)
         {
-            Clients.All.onStrokeCollected(strokeDefinition);
+            await Groups.Add(Context.ConnectionId, sessionUri);
         }
 
-        public void SendEraseStroke(Guid strokeId)
+        public async Task LeaveSession(string sessionUri)
         {
-            Clients.All.onEraseStroke(strokeId);
+            await Groups.Remove(Context.ConnectionId, sessionUri);
         }
 
-        public void SendEraseAllStrokes()
+        public void SendStrokeCollected(string sessionUri, object strokeDefinition)
         {
-            Clients.All.onEraseAllStrokes();
+            Clients.Group(sessionUri).onStrokeCollected(strokeDefinition);
         }
 
-        public void UpdateMachinePresence(string machineName, bool isPresent)
+        public void SendEraseStroke(string sessionUri, Guid strokeId)
         {
-            Clients.All.onUpdateMachinePresence(machineName, isPresent);
+            Clients.Group(sessionUri).onEraseStroke(strokeId);
         }
 
-        public void MachineIsOffline(string machineName)
+        public void SendEraseAllStrokes(string sessionUri)
         {
-            Clients.All.onMachineOffline(machineName);
+            Clients.Group(sessionUri).onEraseAllStrokes();
         }
 
-        public void BackgroundImageChanged(string uri)
+        public void ResendAllStrokes(string sessionUri)
         {
-            Clients.All.onBackgroundImageChanged(uri);
-        }
-
-        public void ResendAllStrokes()
-        {
-            Clients.All.onResendAllStrokesRequested();
+            Clients.Group(sessionUri).onResendAllStrokesRequested();
         }
     }
 }

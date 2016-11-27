@@ -21,12 +21,11 @@ namespace MyWhiteboard.ImageHandling
             ViewModel = new SelectImageViewModel();
         }
 
-        private async void ListViewBase_OnItemClick(object sender, ItemClickEventArgs e)
+        private void ListViewBase_OnItemClick(object sender, ItemClickEventArgs e)
         {
             var backgroundImageDescription = (BackgroundImageDescription)e.ClickedItem;
-            await ViewModel.SaveCurrentBackgroundImageAsync(backgroundImageDescription);
 
-            Frame.Navigate(typeof(MainPage), backgroundImageDescription.Id);
+            Frame.Navigate(typeof(MainPage), backgroundImageDescription.ImageUri);
         }
     }
 }

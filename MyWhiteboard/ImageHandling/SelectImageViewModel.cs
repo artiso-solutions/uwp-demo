@@ -1,13 +1,11 @@
-﻿using System;
+﻿using MyWhiteboard.Properties;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Net.Http;
-using System.Net.Http.Formatting;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
-using MyWhiteboard.Properties;
-using MyWhiteboard.Stroke;
 
 namespace MyWhiteboard.ImageHandling
 {
@@ -53,14 +51,6 @@ namespace MyWhiteboard.ImageHandling
             }
 
             IsLoading = false;
-        }
-
-        public async Task SaveCurrentBackgroundImageAsync(BackgroundImageDescription backgroundImageDescription)
-        {
-            var httpClient = new HttpClient();
-            await httpClient.PostAsync(new Uri($"{Consts.ApiControllerBaseUrl}SetCurrentImage"), new ObjectContent<BackgroundImageDescription>(backgroundImageDescription, new JsonMediaTypeFormatter()));
-
-            StrokeChangeBroker.Instance.SendBackgroundImageChanged(backgroundImageDescription?.ImageUri);
         }
 
         [NotifyPropertyChangedInvocator]
