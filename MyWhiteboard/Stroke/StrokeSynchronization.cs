@@ -52,6 +52,8 @@ namespace MyWhiteboard.Stroke
 
             canvas.InkPresenter.StrokesCollected -= InkPresenterOnStrokesCollected;
             canvas.InkPresenter.StrokesErased -= InkPresenterOnStrokesErased;
+
+            strokeChangeBroker.StopBroker();
         }
 
         private async void StrokeChangeBrokerOnStrokeCollected(object sender, StrokeDescription strokeDescription)

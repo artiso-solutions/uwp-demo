@@ -6,13 +6,6 @@ namespace MyWhiteboard.Service.Controllers
 {
     public class ReviewController : ApiController
     {
-        private readonly StorageAccess storageAccess;
-
-        public ReviewController()
-        {
-            storageAccess = new StorageAccess();
-        }
-
         [HttpGet]
         public List<BackgroundImageDescription> GetImageDescriptions()
         {
@@ -23,24 +16,6 @@ namespace MyWhiteboard.Service.Controllers
                 GetImageDescriptionForImage(3, "Machine 1", "machine1.png"),
                 GetImageDescriptionForImage(4, "Machine 1", "machine2.png")
             };
-        }
-
-        [HttpGet]
-        public string GetCurrentBackgroundImage()
-        {
-            var backgroundImage = storageAccess.LoadCurrentBackgroundImageDescription();
-            return backgroundImage?.ImageUri;
-        }
-
-        [HttpPost]
-        public async void SetCurrentImage([FromBody] BackgroundImageDescription imageDescription)
-        {
-            if (imageDescription == null)
-            {
-                return;
-            }
-
-            await storageAccess.SaveCurrentBackgroundAsync(imageDescription);
         }
 
         private BackgroundImageDescription GetImageDescriptionForImage(int id, string description, string fileName)

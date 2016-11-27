@@ -1,8 +1,5 @@
-﻿using System;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
-using MyWhiteboard.Properties;
-using ProtoBuf;
+﻿using ProtoBuf;
+using System;
 
 namespace MyWhiteboard.Stroke
 {
@@ -41,30 +38,5 @@ namespace MyWhiteboard.Stroke
         public double[] SizeValues;
         [ProtoMember(11)]
         public double Opacity;
-    }
-
-    public class PresenceInfo : INotifyPropertyChanged
-    {
-        private bool isPresent;
-        public string MachineName { get; set; }
-
-        public bool IsPresent
-        {
-            get { return isPresent; }
-            set
-            {
-                if (value == isPresent) return;
-                isPresent = value;
-                OnPropertyChanged();
-            }
-        }
-
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        [NotifyPropertyChangedInvocator]
-        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
     }
 }

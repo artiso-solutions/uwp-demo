@@ -1,14 +1,10 @@
-﻿using System;
-using System.Linq;
+﻿using MyWhiteboard.ImageHandling;
+using System;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
-using Windows.Networking;
-using Windows.Networking.Connectivity;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Navigation;
-using MyWhiteboard.ImageHandling;
-using MyWhiteboard.Stroke;
 
 namespace MyWhiteboard
 {
@@ -34,12 +30,12 @@ namespace MyWhiteboard
         /// <param name="e">Details about the launch request and process.</param>
         protected override void OnLaunched(LaunchActivatedEventArgs e)
         {
-//#if DEBUG
-//            if (System.Diagnostics.Debugger.IsAttached)
-//            {
-//                this.DebugSettings.EnableFrameRateCounter = true;
-//            }
-//#endif
+            //#if DEBUG
+            //            if (System.Diagnostics.Debugger.IsAttached)
+            //            {
+            //                this.DebugSettings.EnableFrameRateCounter = true;
+            //            }
+            //#endif
             Frame rootFrame = Window.Current.Content as Frame;
 
             // Do not repeat app initialization when the Window already has content,
@@ -94,10 +90,6 @@ namespace MyWhiteboard
         private void OnSuspending(object sender, SuspendingEventArgs e)
         {
             var deferral = e.SuspendingOperation.GetDeferral();
-
-            var hostNames = NetworkInformation.GetHostNames();
-            var machineName = hostNames.FirstOrDefault(name => name.Type == HostNameType.DomainName)?.DisplayName ?? "???";
-            StrokeChangeBroker.Instance.SendMachineIsOffline(machineName);
 
             deferral.Complete();
         }
