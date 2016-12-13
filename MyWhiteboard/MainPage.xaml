@@ -4,30 +4,117 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
       xmlns:myWhiteboard="using:MyWhiteboard"
-      xmlns:stroke="using:MyWhiteboard.Stroke"
-      Loaded="OnLoadedMainPage"
+      d:DataContext="{d:DesignInstance myWhiteboard:SelectImageViewModel}"
       mc:Ignorable="d">
     <Page.Resources>
-        <myWhiteboard:IsPresentToBrushConverter x:Key="IsPresentToBrushConverter" />
+        <DataTemplate x:Key="BackgroundImageTemplateWide" x:DataType="myWhiteboard:BackgroundImageDescription">
+            <Border x:Name="ItemBorder"
+                    Width="300"
+                    Height="200"
+                    Margin="8"
+                    Background="{ThemeResource ButtonBackgroundThemeBrush}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="1*" />
+                        <ColumnDefinition Width="2*" />
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Column="0"
+                               Grid.ColumnSpan="2"
+                               Margin="8"
+                               VerticalAlignment="Bottom"
+                               FontWeight="Bold"
+                               Foreground="{ThemeResource ButtonForegroundThemeBrush}"
+                               Text="{x:Bind Description}" />
+                    <Image Grid.Column="1"
+                           Margin="8"
+                           Source="{x:Bind ThumbnailUri}"
+                           Stretch="Uniform" />
+                </Grid>
+            </Border>
+        </DataTemplate>
+
+        <DataTemplate x:Key="BackgroundImageTemplateNarrow" x:DataType="myWhiteboard:BackgroundImageDescription">
+            <Border x:Name="ItemBorder"
+                    Width="256"
+                    Height="80"
+                    Margin="4"
+                    Background="{ThemeResource ButtonBackgroundThemeBrush}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="1*" />
+                        <ColumnDefinition Width="2*" />
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Column="0"
+                               Grid.ColumnSpan="2"
+                               Margin="4"
+                               VerticalAlignment="Bottom"
+                               FontWeight="Bold"
+                               Foreground="{ThemeResource ButtonForegroundThemeBrush}"
+                               Text="{x:Bind Description}" />
+                    <Image Grid.Column="1"
+                           Margin="4"
+                           Source="{x:Bind ThumbnailUri}"
+                           Stretch="Uniform" />
+                </Grid>
+            </Border>
+        </DataTemplate>
     </Page.Resources>
 
-    <Grid Background="#FFE6E6E6">
+
+    <Grid x:Name="LayoutRoot"
+          Margin="24 8"
+          Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <InkToolbar x:Name="InkToolbar"
-                    Grid.Row="0"
-                    TargetInkCanvas="{Binding ElementName=InkCanvas}" />
+        <TextBlock Grid.Row="0"
+                   Style="{ThemeResource TitleTextBlockStyle}"
+                   Text="My Whiteboard" />
+        <TextBlock Grid.Row="1"
+                   Style="{ThemeResource SubtitleTextBlockStyle}"
+                   Text="Select Session" />
 
-        <Viewbox Grid.Row="1">
-            <Grid Width="1920"
-                  Height="1200"
-                  Background="#FFFFFFFF">
-                <Image x:Name="BackImage" Stretch="Uniform" />
-                <InkCanvas x:Name="InkCanvas" />
-            </Grid>
-        </Viewbox>
+        <ProgressRing Grid.Row="2"
+                      Width="50"
+                      Height="50"
+                      HorizontalAlignment="Center"
+                      VerticalAlignment="Center"
+                      IsActive="{x:Bind ViewModel.IsLoading, Mode=OneWay}" />
+
+        <GridView x:Name="RoomsGridView"
+                  Grid.Row="2"
+                  IsItemClickEnabled="True"
+                  ItemClick="ListViewBase_OnItemClick"
+                  ItemTemplate="{StaticResource BackgroundImageTemplateWide}"
+                  ItemsSource="{x:Bind ViewModel.Images}"
+                  SelectionMode="None" />
+
+        <VisualStateManager.VisualStateGroups>
+            <VisualStateGroup x:Name="WindowStates">
+                <VisualState x:Name="WideState">
+                    <VisualState.StateTriggers>
+                        <AdaptiveTrigger MinWindowWidth="800" />
+                    </VisualState.StateTriggers>
+                    <VisualState.Setters>
+                        <Setter Target="LayoutRoot.Margin" Value="24 8" />
+                        <Setter Target="RoomsGridView.ItemTemplate" Value="{StaticResource BackgroundImageTemplateWide}" />
+                    </VisualState.Setters>
+                </VisualState>
+                <VisualState x:Name="NarrowState">
+                    <VisualState.StateTriggers>
+                        <AdaptiveTrigger MinWindowWidth="0" />
+                    </VisualState.StateTriggers>
+                    <VisualState.Setters>
+                        <Setter Target="LayoutRoot.Margin" Value="12 8" />
+                        <Setter Target="RoomsGridView.ItemTemplate" Value="{StaticResource BackgroundImageTemplateNarrow}" />
+                    </VisualState.Setters>
+                </VisualState>
+            </VisualStateGroup>
+        </VisualStateManager.VisualStateGroups>
     </Grid>
 </Page>

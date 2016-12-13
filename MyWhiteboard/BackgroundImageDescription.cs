@@ -1,4 +1,4 @@
-﻿namespace MyWhiteboard.ImageHandling
+﻿namespace MyWhiteboard
 {
     public class BackgroundImageDescription
     {

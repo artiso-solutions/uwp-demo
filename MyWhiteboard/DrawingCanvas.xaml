@@ -1,0 +1,33 @@
+﻿<Page x:Class="MyWhiteboard.DrawingCanvas"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:myWhiteboard="using:MyWhiteboard"
+      xmlns:stroke="using:MyWhiteboard.Stroke"
+      Loaded="OnLoadedMainPage"
+      mc:Ignorable="d">
+    <Page.Resources>
+        <myWhiteboard:IsPresentToBrushConverter x:Key="IsPresentToBrushConverter" />
+    </Page.Resources>
+
+    <Grid Background="#FFE6E6E6">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <InkToolbar x:Name="InkToolbar"
+                    Grid.Row="0"
+                    TargetInkCanvas="{Binding ElementName=InkCanvas}" />
+
+        <Viewbox Grid.Row="1">
+            <Grid Width="1920"
+                  Height="1200"
+                  Background="#FFFFFFFF">
+                <Image x:Name="BackImage" Stretch="Uniform" />
+                <InkCanvas x:Name="InkCanvas" />
+            </Grid>
+        </Viewbox>
+    </Grid>
+</Page>
